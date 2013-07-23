@@ -1,0 +1,186 @@
+1c1
+< // @(#)root/tmva $Id$
+---
+> // @(#)root/tmva $Id: TMVAClassification.C 38895 2011-04-18 11:59:54Z evt $
+51c51
+< void myTMVA( TString myMethodList = "" )
+---
+> void TMVAClassification( TString myMethodList = "" )
+77c77
+<    Use["CutsD"]           = 0;
+---
+>    Use["CutsD"]           = 1;
+79c79
+<    Use["CutsGA"]          = 1;
+---
+>    Use["CutsGA"]          = 0;
+83c83
+<    Use["Likelihood"]      = 0;
+---
+>    Use["Likelihood"]      = 1;
+85c85
+<    Use["LikelihoodPCA"]   = 0; // the "PCA" extension indicates PCA-transformed input variables (see option strings)
+---
+>    Use["LikelihoodPCA"]   = 1; // the "PCA" extension indicates PCA-transformed input variables (see option strings)
+90c90
+<    Use["PDERS"]           = 0;
+---
+>    Use["PDERS"]           = 1;
+93c93
+<    Use["PDEFoam"]         = 0;
+---
+>    Use["PDEFoam"]         = 1;
+95c95
+<    Use["KNN"]             = 0; // k-nearest neighbour method
+---
+>    Use["KNN"]             = 1; // k-nearest neighbour method
+105c105
+<    Use["FDA_GA"]          = 0; // minimisation of user-defined function using Genetics Algorithm
+---
+>    Use["FDA_GA"]          = 1; // minimisation of user-defined function using Genetics Algorithm
+115c115
+<    Use["MLPBNN"]          = 0; // Recommended ANN with BFGS training method and bayesian regulator
+---
+>    Use["MLPBNN"]          = 1; // Recommended ANN with BFGS training method and bayesian regulator
+130c130
+<    Use["RuleFit"]         = 0;
+---
+>    Use["RuleFit"]         = 1;
+159c159
+<    TString outfileName( "myTMVA.root" );
+---
+>    TString outfileName( "TMVA.root" );
+173c173
+<                                                "!V:!Silent:!Color:DrawProgressBar:Transformations=I;D;P;G,D:AnalysisType=Classification" );
+---
+>                                                "!V:!Silent:Color:DrawProgressBar:Transformations=I;D;P;G,D:AnalysisType=Classification" );
+183,198c183,186
+<     factory->AddVariable( "MET_Pt", 'F' );
+<     factory->AddVariable( "HT", 'F' );
+<     factory->AddVariable( "nElectron", 'I' );
+< //    factory->AddVariable( "Electron_Pt1", 'F' );
+< //    factory->AddVariable( "Electron_Pt2", 'F' );
+<     factory->AddVariable( "nMuon", 'I' );
+< //    factory->AddVariable( "Muon_Pt1", 'F' );
+< //    factory->AddVariable( "Muon_Pt2", 'F' );
+<     factory->AddVariable( "nJet", 'I' );
+< //    factory->AddVariable( "Jet_Pt1", 'F' );
+< //    factory->AddVariable( "Jet_Pt2", 'F' );
+< //    factory->AddVariable( "nBJet", 'I' );
+< 
+< //  factory->AddVariable( "myvar2 := var1-var2", "Expression 2", "", 'F' );
+< //  factory->AddVariable( "var3",                "Variable 3", "units", 'F' );
+<    //factory->AddVariable( "var4",                "Variable 4", "units", 'F' );
+---
+>    factory->AddVariable( "myvar1 := var1+var2", 'F' );
+>    factory->AddVariable( "myvar2 := var1-var2", "Expression 2", "", 'F' );
+>    factory->AddVariable( "var3",                "Variable 3", "units", 'F' );
+>    factory->AddVariable( "var4",                "Variable 4", "units", 'F' );
+203,206c191,192
+<    // factory->AddSpectator( "TopInfo_M1",  "M(cZ)", "units", 'F' );
+<    // factory->AddSpectator( "TopInfo_M2",  "M(bW)", "units", 'F' );
+< //    factory->AddSpectator( "spec1 := var1*2",  "Spectator 1", "units", 'F' );
+< //    factory->AddSpectator( "spec2 := var1*3",  "Spectator 2", "units", 'F' );
+---
+>    factory->AddSpectator( "spec1 := var1*2",  "Spectator 1", "units", 'F' );
+>    factory->AddSpectator( "spec2 := var1*3",  "Spectator 2", "units", 'F' );
+210,213c196
+<    TFile *sigFile = TFile::Open( "mva_ttbar.root" );
+<    TFile *bkgFile1 = TFile::Open( "mva_dy.root" );
+<    TFile *bkgFile2 = TFile::Open( "mva_wjets_1.root" );
+<    TFile *bkgFile4 = TFile::Open( "mva_qcd.root" );
+---
+>    TString fname = "./tmva_class_example.root";
+215,216c198,203
+<    std::cout << "--- TMVAClassification       : Using input file: "
+< 	     << sigFile->GetName() << std::endl;
+---
+>    if (gSystem->AccessPathName( fname ))  // file does not exist in local directory
+>       gSystem->Exec("wget http://root.cern.ch/files/tmva_class_example.root");
+>    
+>    TFile *input = TFile::Open( fname );
+>    
+>    std::cout << "--- TMVAClassification       : Using input file: " << input->GetName() << std::endl;
+220,225c207,208
+<    TTree *signal     = (TTree*)sigFile->Get("mvaTree");
+<    TTree *background1 = (TTree*)bkgFile1->Get("mvaTree");
+<    TTree *background2 = (TTree*)bkgFile2->Get("mvaTree");
+<    TTree *background3 = (TTree*)bkgFile3->Get("mvaTree");
+<    TTree *background4 = (TTree*)bkgFile4->Get("mvaTree");
+<    //TTree *background = (TTree*)sigFile->Get("mvaTree");
+---
+>    TTree *signal     = (TTree*)input->Get("TreeS");
+>    TTree *background = (TTree*)input->Get("TreeB");
+232,240c215,220
+<    //   factory->AddSignalTree    ( signal,     signalWeight     );
+<    factory->AddSignalTree    ( signal,     0.95*1000/180702  );
+<    factory->AddBackgroundTree( background1, 158.*1000/3697476 );
+<    //   factory->AddBackgroundTree( background2, 30059.*1000/78063229 );
+<    factory->AddBackgroundTree( background3, 2939.*1000/35064522 );
+<    factory->AddBackgroundTree( background4, 43.*1000/4223963 );
+<    factory->AddBackgroundTree( background5, 18.*1000/4263113 );
+<    factory->AddBackgroundTree( background6, 5.9*1000/2108054 );
+<    //   factory->AddBackgroundTree( background, backgroundWeight );
+---
+>    factory->AddSignalTree    ( signal,     signalWeight     );
+>    factory->AddBackgroundTree( background, backgroundWeight );
+>    
+>    // To give different trees for training and testing, do as follows:
+>    //    factory->AddSignalTree( signalTrainingTree, signalTrainWeight, "Training" );
+>    //    factory->AddSignalTree( signalTestTree,     signalTestWeight,  "Test" );
+242c222,260
+<    //factory->SetBackgroundWeightExpression( "weight" );
+---
+>    // Use the following code instead of the above two or four lines to add signal and background
+>    // training and test events "by hand"
+>    // NOTE that in this case one should not give expressions (such as "var1+var2") in the input
+>    //      variable definition, but simply compute the expression before adding the event
+>    //
+>    //     // --- begin ----------------------------------------------------------
+>    //     std::vector<Double_t> vars( 4 ); // vector has size of number of input variables
+>    //     Float_t  treevars[4], weight;
+>    //     
+>    //     // Signal
+>    //     for (UInt_t ivar=0; ivar<4; ivar++) signal->SetBranchAddress( Form( "var%i", ivar+1 ), &(treevars[ivar]) );
+>    //     for (UInt_t i=0; i<signal->GetEntries(); i++) {
+>    //        signal->GetEntry(i);
+>    //        for (UInt_t ivar=0; ivar<4; ivar++) vars[ivar] = treevars[ivar];
+>    //        // add training and test events; here: first half is training, second is testing
+>    //        // note that the weight can also be event-wise
+>    //        if (i < signal->GetEntries()/2.0) factory->AddSignalTrainingEvent( vars, signalWeight );
+>    //        else                              factory->AddSignalTestEvent    ( vars, signalWeight );
+>    //     }
+>    //   
+>    //     // Background (has event weights)
+>    //     background->SetBranchAddress( "weight", &weight );
+>    //     for (UInt_t ivar=0; ivar<4; ivar++) background->SetBranchAddress( Form( "var%i", ivar+1 ), &(treevars[ivar]) );
+>    //     for (UInt_t i=0; i<background->GetEntries(); i++) {
+>    //        background->GetEntry(i);
+>    //        for (UInt_t ivar=0; ivar<4; ivar++) vars[ivar] = treevars[ivar];
+>    //        // add training and test events; here: first half is training, second is testing
+>    //        // note that the weight can also be event-wise
+>    //        if (i < background->GetEntries()/2) factory->AddBackgroundTrainingEvent( vars, backgroundWeight*weight );
+>    //        else                                factory->AddBackgroundTestEvent    ( vars, backgroundWeight*weight );
+>    //     }
+>          // --- end ------------------------------------------------------------
+>    //
+>    // --- end of tree registration 
+> 
+>    // Set individual event weights (the variables must exist in the original TTree)
+>    //    for signal    : factory->SetSignalWeightExpression    ("weight1*weight2");
+>    //    for background: factory->SetBackgroundWeightExpression("weight1*weight2");
+>    factory->SetBackgroundWeightExpression( "weight" );
+245,250c263,264
+<    //TCut mycuts = "TopInfo_MCTruth>2"; // for example: TCut mycuts = "abs(var1)<0.5 && abs(var2-0.5)<1";
+<    //    TCut mycuts = ""; // for example: TCut mycuts = "abs(var1)<0.5 && abs(var2-0.5)<1";
+<     TCut mycutb = ""; // for example: TCut mycutb = "abs(var1)<0.5";
+<     //    TCut mycutb = "TopInfo_MCTruth<3"; // for example: TCut mycutb = "abs(var1)<0.5";
+<     TCut mycuts = "JetInfo_Pt1>30 && JetInfo_Pt2>30 && LepInfo_Pt1>20 && LepInfo_Pt2>20 && LepInfo_Pt3>20 && TopInfo_MCTruth>2"; // for example: TCut mycuts = "abs(var1)<0.5 && abs(var2-0.5)<1";
+<     TCut mycutb = "JetInfo_Pt1>30 && JetInfo_Pt2>30 && LepInfo_Pt1>20 && LepInfo_Pt2>20 && LepInfo_Pt3>20"; // for example: TCut mycutb = "abs(var1)<0.5";
+---
+>    TCut mycuts = ""; // for example: TCut mycuts = "abs(var1)<0.5 && abs(var2-0.5)<1";
+>    TCut mycutb = ""; // for example: TCut mycutb = "abs(var1)<0.5";
+285c299
+<                            "H:!V:FitMethod=GA:CutRangeMin[0]=-10:CutRangeMax[0]=2000:VarProp[1]=FMax:EffSel:Steps=30:Cycles=3:PopSize=400:SC_steps=10:SC_rate=5:SC_factor=0.95" );
+---
+>                            "H:!V:FitMethod=GA:CutRangeMin[0]=-10:CutRangeMax[0]=10:VarProp[1]=FMax:EffSel:Steps=30:Cycles=3:PopSize=400:SC_steps=10:SC_rate=5:SC_factor=0.95" );
